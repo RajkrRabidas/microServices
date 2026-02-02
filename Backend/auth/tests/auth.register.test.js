@@ -9,6 +9,8 @@ let mongoServer;
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
+  process.env.MONGODB_URL = uri;
+  process.env.JWT_SECRET = 'test_jwt_secret';
   await mongoose.connect(uri);
 });
 
@@ -30,7 +32,7 @@ test('POST /auth/register creates a user', async () => {
     phone: '1234567890'
   };
 
-  const res = await request(app).post('/auth/register').send(payload);
+  const res = await request(app).post('/api/auth/register').send(payload);
 
   expect(res.statusCode).toBe(201);
   expect(res.body).toHaveProperty('user');
@@ -52,11 +54,11 @@ test('POST /auth/register rejects duplicate email or username', async () => {
   };
 
   // create first
-  const res1 = await request(app).post('/auth/register').send(payload);
+  const res1 = await request(app).post('/api/auth/register').send(payload);
   expect(res1.statusCode).toBe(201);
 
   // try to create duplicate
-  const res2 = await request(app).post('/auth/register').send(payload);
+  const res2 = await request(app).post('/api/auth/register').send(payload);
   expect(res2.statusCode).toBe(400);
   expect(res2.body).toHaveProperty('message');
 });

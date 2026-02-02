@@ -12,4 +12,16 @@ const registerUserSchema = z.object({
     phone: z.string().min(10, 'Phone number must be at least 10 digits long'),
 });
 
-module.exports = registerUserSchema;
+const loginUserSchema = z.object({
+    username: z.string().optional(),
+    email: z.string().email('Invalid email address').optional(),    
+    password: z.string().min(1, 'Password is required'),
+}).refine(
+    (data) => data.username || data.email,
+    {
+        message: 'Either username or email is required',
+        path: ['username'],
+    }
+);
+
+module.exports = {registerUserSchema, loginUserSchema};
