@@ -2,6 +2,7 @@ const userModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const {registerUserSchema, loginUserSchema} = require('../validator/validator');
+const redis = require('../db/redis');
 
 
 const registerUser = async (req, res) => {
@@ -111,6 +112,7 @@ const getCurrentUser = async (req, res) => {
     message: 'Current user fetched successfully',
     user: req.user });
 }
+
 
 
 module.exports = {
