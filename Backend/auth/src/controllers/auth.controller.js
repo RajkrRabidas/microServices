@@ -113,10 +113,28 @@ const getCurrentUser = async (req, res) => {
     user: req.user });
 }
 
+const logOutUser = async (req, res) => {
+    const token = req.cookies.token;
 
+    if (token) {
+        try {
+            await redis.set(`blacklist:${token}`, 'true', 'EX',24 * 60 * 60); // Blacklist for 1 day
+        } catch (err) {
+            console.warn('Redis unavailable, skipping token blacklist:', err && err.message);
+        }
+    }
+
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: true,
+    });
+
+    return res.status(200).json({ message: 'Logged out successfully' });
+}
 
 module.exports = {
     registerUser,
     loginUser,
-    getCurrentUser
+    getCurrentUser,
+    logOutUser
 };

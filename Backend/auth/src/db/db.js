@@ -7,7 +7,13 @@ const connectDB = async () => {
         console.log("MongoDB connected successfully");
     } catch (error) {
         console.error("MongoDB connection failed:", error);
-        process.exit(1);
+        // In test runs we don't want to terminate the Jest process.
+        // Rethrow the error so tests can handle it; otherwise exit in non-test environments.
+        if (process.env.NODE_ENV === 'test') {
+            throw error;
+        } else {
+            process.exit(1);
+        }
     }
 
 };

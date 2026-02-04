@@ -1,8 +1,29 @@
 const request = require('supertest');
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../src/app');
 const connectDB = require('../src/db/db');
 const userModel = require('../src/models/user.model');
+
+let mongoServer;
+
+beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    process.env.MONGODB_URL = uri;
+    process.env.JWT_SECRET = 'test_jwt_secret';
+    await mongoose.connect(uri);
+});
+
+afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+});
+
+afterEach(async () => {
+    await userModel.deleteMany({});
+});
 
 // Skipped until the /api/auth/logout endpoint is implemented
 describe('GET /api/auth/logout', () => {
@@ -19,6 +40,7 @@ describe('GET /api/auth/logout', () => {
             email: 'logout@example.com',
             password: hash,
             fullName: { firstName: 'Log', lastName: 'Out' },
+            phone: '0000000000',
         });
 
         const loginRes = await request(app)
