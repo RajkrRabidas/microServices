@@ -24,4 +24,13 @@ const loginUserSchema = z.object({
     }
 );
 
-module.exports = {registerUserSchema, loginUserSchema};
+const addUserAddressValidator = z.object({
+    street: z.string().nonempty('Street is required'),
+    city: z.string().nonempty('City is required'),
+    state: z.string().nonempty('State is required'),
+    pincode: z.string().min(5, 'pincode must be at least 5 characters long'),
+    country: z.string().nonempty('Country is required'),
+    isDefault: z.boolean().optional(),
+});
+
+module.exports = {registerUserSchema, loginUserSchema, addUserAddressValidator};

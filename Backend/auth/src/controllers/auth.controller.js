@@ -1,7 +1,7 @@
 const userModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {registerUserSchema, loginUserSchema} = require('../validator/validator');
+const {registerUserSchema, loginUserSchema, addUserAddressValidator} = require('../validator/validator');
 const redis = require('../db/redis');
 
 
@@ -132,9 +132,71 @@ const logOutUser = async (req, res) => {
     return res.status(200).json({ message: 'Logged out successfully' });
 }
 
+const getUserAddresses = async (req, res) => {
+    const id = req.user.id;
+
+    const user = await userModel.findById(id).select('addresses');
+
+    if(!user){
+        return res.status(404).json({ message: 'User not found' });
+    }
+    return res.status(200).json({
+        message: 'User addresses fetched successfully',
+        addresses: user.addresses
+    });
+}
+
+const addUserAddress = async (req, res) => {
+    const id = req.user.id;
+
+    const addressValidator = addUserAddressValidator.safeParse(req.body);
+    if (addressValidator.error) {
+        return res.status(400).json({ message: addressValidator.error.issues[0].message });
+    }
+
+    const {street, city, state, pincode, country, isDefault} = addressValidator.data;
+
+    const user = await userModel.findOneAndUpdate(
+        { _id: id },
+        { $push: { addresses: { street, city, state, pincode, country, isDefault } } },
+        { new: true }
+    );
+    if(!user){
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(201).json({
+        message: 'Address added successfully',
+        address: user.addresses[user.addresses.length - 1],
+        defaultAddressId: isDefault ? user.addresses[user.addresses.length - 1]._id : undefined,
+    });
+}
+
+const deleteUserAddress = async (req, res) => {
+    const id = req.user.id;
+    const { addressId } = req.params;
+
+    const user = await userModel.findById(id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const idx = user.addresses.findIndex(a => a._id.toString() === addressId);
+    if (idx === -1) {
+        return res.status(404).json({ message: 'Address not found' });
+    }
+
+    user.addresses.splice(idx, 1);
+    await user.save();
+
+    return res.status(200).json({ message: 'Address deleted', addresses: user.addresses });
+}
+
 module.exports = {
     registerUser,
     loginUser,
     getCurrentUser,
-    logOutUser
+    logOutUser,
+    getUserAddresses,
+    addUserAddress
+    ,
+    deleteUserAddress
 };
