@@ -72,10 +72,7 @@ const createProduct = async (req, res) => {
   }
 };
 
-/**
- * GET /api/products/:id
- * Get product by ID
- */
+
 const getProduct = async (req, res) => {
   try {
     const { id } = req.params;
@@ -97,11 +94,7 @@ const getProduct = async (req, res) => {
   }
 };
 
-/**
- * GET /api/products
- * Get all products with pagination
- */
-const getAllProducts = async (req, res) => {
+ getAllProducts = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     
