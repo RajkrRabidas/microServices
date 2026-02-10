@@ -22,7 +22,6 @@ const createProduct = async (req, res) => {
       });
     }
 
-    // Process images with ImageKit
     let images = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
@@ -47,7 +46,6 @@ const createProduct = async (req, res) => {
       }
     }
 
-    // Create product
     const product = new Product({
       title,
       description: description || '',
