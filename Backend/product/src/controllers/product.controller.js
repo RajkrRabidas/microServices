@@ -1,4 +1,5 @@
 const Product = require('../models/product.model');
+const { uploadImage } = require('../services/imagekit.service');
 
 /**
  * POST /api/products
@@ -7,12 +8,13 @@ const Product = require('../models/product.model');
 const createProduct = async (req, res) => {
   try {
     const { title, description, price, currency } = req.body;
-    const sellerId = req.user?._id || req.body.seller;
+    
+    const sellerId = req.user.id; // Assuming auth middleware sets req.user
 
     // Validation
     if (!title || !price) {
       return res.status(400).json({ 
-        error: 'Title and price are required' 
+        message: 'Title and price are required' 
       });
     }
 
@@ -23,28 +25,7 @@ const createProduct = async (req, res) => {
     }
 
     let images = [];
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        try {
-          const response = await imagekit.upload({
-            file: file.buffer,
-            fileName: `${Date.now()}-${file.originalname}`,
-            folder: '/products',
-          });
-
-          images.push({
-            URL: response.url,
-            thumbnail: response.thumbnailUrl,
-            id: response.fileId,
-          });
-        } catch (imageError) {
-          return res.status(500).json({ 
-            error: 'Image upload failed',
-            details: imageError.message 
-          });
-        }
-      }
-    }
+    const files = await Promise.all((req.files || []).map(file => uploadImage({buffer: file.buffer})));
 
     const product = new Product({
       title,
@@ -94,7 +75,7 @@ const getProduct = async (req, res) => {
   }
 };
 
- getAllProducts = async (req, res) => {
+const getAllProducts = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     
