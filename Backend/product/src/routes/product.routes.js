@@ -1,11 +1,12 @@
-const express = require('express');
-const multer = require('multer');
-const createAuthMiddleware = require('../middlewares/auth.middleware');
+const express = require("express");
+const multer = require("multer");
+const createAuthMiddleware = require("../middlewares/auth.middleware");
 const {
   createProduct,
   getProduct,
   getAllProducts,
-} = require('../controllers/product.controller');
+} = require("../controllers/product.controller");
+const { validateCreateProduct, validateGetAllProducts, validateGetProduct } = require("../validator/expressValidator");
 
 const router = express.Router();
 
@@ -15,8 +16,8 @@ const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     // Only allow image files
-    if (!file.mimetype.startsWith('image/')) {
-      cb(new Error('Only image files are allowed'), false);
+    if (!file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed"), false);
     } else {
       cb(null, true);
     }
@@ -27,7 +28,14 @@ const upload = multer({
 });
 
 // Routes
-router.post('/', createAuthMiddleware(["admin", "seller"]), upload.array('images', 5), createProduct);
-
+router.post(
+  "/",
+  createAuthMiddleware(["admin", "seller"]),
+  upload.array("images", 5),
+  validateCreateProduct,
+  createProduct,
+);
+router.get("/", validateGetAllProducts, getAllProducts);
+router.get("/:id", validateGetProduct, getProduct);
 
 module.exports = router;

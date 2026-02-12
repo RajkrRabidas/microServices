@@ -6,7 +6,7 @@ const Product = require('../src/models/product.model');
 const productRoutes = require('../src/routes/product.routes');
 
 // Mock ImageKit
-jest.mock('imagekit', () => {
+jest.mock('@imagekit/nodejs', () => {
   return jest.fn().mockImplementation(() => ({
     upload: jest.fn().mockResolvedValue({
       url: 'https://ik.imagekit.io/test/product-123.jpg',
