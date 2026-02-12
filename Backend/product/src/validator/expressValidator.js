@@ -44,29 +44,9 @@ const validateCreateProduct = [
 ];
 
 // Validation rules for getting all products (pagination)
-const validateGetAllProducts = [
-  query("page")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer"),
-  query("limit")
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage("Limit must be between 1 and 100"),
-  handleValidationErrors,
-];
 
 // Validation rules for getting a single product
-const validateGetProduct = [
-  query("id")
-    .optional()
-    .isMongoId()
-    .withMessage("Invalid product ID"),
-  handleValidationErrors,
-];
 
 module.exports = {
   validateCreateProduct,
-  validateGetAllProducts,
-  validateGetProduct,
 };

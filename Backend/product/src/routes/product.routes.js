@@ -6,7 +6,7 @@ const {
   getProduct,
   getAllProducts,
 } = require("../controllers/product.controller");
-const { validateCreateProduct, validateGetAllProducts, validateGetProduct } = require("../validator/expressValidator");
+const { validateCreateProduct } = require("../validator/expressValidator");
 
 const router = express.Router();
 
