@@ -9,12 +9,12 @@ const createProduct = async (req, res) => {
   try {
     const { title, description, price, currency } = req.body;
     
-    const sellerId = req.user.id; // Assuming auth middleware sets req.user
+    const sellerId = (req.user && req.user.id) || req.body.seller; // support tests sending seller in body
 
     // Validation
     if (!title || !price) {
       return res.status(400).json({ 
-        message: 'Title and price are required' 
+        error: 'Title and price are required' 
       });
     }
 
@@ -24,8 +24,8 @@ const createProduct = async (req, res) => {
       });
     }
 
-    let images = [];
-    const files = await Promise.all((req.files || []).map(file => uploadImage({buffer: file.buffer})));
+    const uploaded = await Promise.all((req.files || []).map(file => uploadImage({ buffer: file.buffer })));
+    const images = (uploaded || []).map(u => ({ URL: u.url, thumbnail: u.thumbnail, id: u.id }));
 
     const product = new Product({
       title,

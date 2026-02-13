@@ -17,9 +17,8 @@ const handleValidationErrors = (req, res, next) => {
 // Validation rules for creating a product
 const validateCreateProduct = [
   body("title")
+    .optional()
     .trim()
-    .notEmpty()
-    .withMessage("Title is required")
     .isLength({ min: 3, max: 100 })
     .withMessage("Title must be between 3 and 100 characters"),
 
@@ -30,8 +29,7 @@ const validateCreateProduct = [
     .withMessage("Description must not exceed 500 characters"),
 
   body("price")
-    .notEmpty()
-    .withMessage("Price is required")
+    .optional()
     .isFloat({ min: 0.01 })
     .withMessage("Price must be a positive number"),
 

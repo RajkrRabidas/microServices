@@ -5,15 +5,17 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const Product = require('../src/models/product.model');
 const productRoutes = require('../src/routes/product.routes');
 
-// Mock ImageKit
+// Mock ImageKit as a singleton so tests and service share the same upload mock
 jest.mock('@imagekit/nodejs', () => {
-  return jest.fn().mockImplementation(() => ({
-    upload: jest.fn().mockResolvedValue({
-      url: 'https://ik.imagekit.io/test/product-123.jpg',
-      thumbnailUrl: 'https://ik.imagekit.io/test/tr:w-200/product-123.jpg',
-      fileId: 'file_123456',
-    }),
-  }));
+  const uploadMock = jest.fn().mockResolvedValue({
+    url: 'https://ik.imagekit.io/test/product-123.jpg',
+    thumbnailUrl: 'https://ik.imagekit.io/test/tr:w-200/product-123.jpg',
+    fileId: 'file_123456',
+  });
+
+  const instance = { upload: uploadMock };
+  const factory = jest.fn().mockImplementation(() => instance);
+  return factory;
 });
 
 let app;
@@ -26,10 +28,7 @@ describe('POST /api/products - Create Product with Images', () => {
     mongoServer = await MongoMemoryServer.create();
     const mongoUri = mongoServer.getUri();
     
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoUri);
 
     // Setup Express app
     app = express();
@@ -233,8 +232,9 @@ describe('POST /api/products - Create Product with Images', () => {
 
   describe('ImageKit Integration', () => {
     test('should call ImageKit upload for each image', async () => {
-      const ImageKit = require('imagekit');
+      const ImageKit = require('@imagekit/nodejs');
       const mockUpload = ImageKit().upload;
+      mockUpload.mockClear();
 
       await request(app)
         .post('/api/products')
