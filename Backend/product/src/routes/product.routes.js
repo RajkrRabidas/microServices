@@ -1,30 +1,24 @@
 const express = require("express");
 const multer = require("multer");
-const createAuthMiddleware = require("../middlewares/auth.middleware");
+const { createAuthMiddleware } = require("../middlewares/auth.middleware");
 const {
   createProduct,
-  getProduct,
-  getAllProducts,
 } = require("../controllers/product.controller");
 const { validateCreateProduct } = require("../validator/expressValidator");
 
 const router = express.Router();
 
 // Configure multer for image uploads
-const storage = multer.memoryStorage();
-const upload = multer({
-  storage,
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    // Only allow image files
-    if (!file.mimetype.startsWith("image/")) {
-      cb(new Error("Only image files are allowed"), false);
-    } else {
-      cb(null, true);
-    }
-  },
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
-  },
+    // Accept files with image extensions or image/* mimetype
+    const allowedExt = /\.(jpg|jpeg|png|gif)$/i;
+    if (file.mimetype && file.mimetype.startsWith('image/')) return cb(null, true);
+    if (allowedExt.test(file.originalname)) return cb(null, true);
+    cb(new Error('Only image files are allowed'));
+  }
 });
 
 // Routes
@@ -33,15 +27,18 @@ const upload = multer({
 router.post(
   "/products",
   upload.array("images", 5),
+  createAuthMiddleware([ 'admin', 'seller' ]),
   validateCreateProduct,
-  createProduct
+  createProduct,
 );
 
 // Multer / upload error handler for this router
 router.use((err, req, res, next) => {
   if (err) {
     // Multer file filter or size errors
-    return res.status(400).json({ error: err.message || 'Invalid file upload' });
+    return res
+      .status(400)
+      .json({ error: err.message || "Invalid file upload" });
   }
   next();
 });

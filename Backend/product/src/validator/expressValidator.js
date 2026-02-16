@@ -36,8 +36,8 @@ const validateCreateProduct = [
   body("currency")
     .optional()
     .trim()
-    .isIn(["INR", "USD", "EUR", "GBP", "JPY", "AUD"])
-    .withMessage("Currency must be one of: INR, USD, EUR, GBP, JPY, AUD"),
+    .isIn(["INR", "USD"])
+    .withMessage("Currency must be one of: INR, USD"),
   handleValidationErrors,
 ];
 

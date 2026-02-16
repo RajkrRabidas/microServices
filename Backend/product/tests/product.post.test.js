@@ -22,7 +22,7 @@ let app;
 let mongoServer;
 let userId;
 
-describe('POST /api/products - Create Product with Images', () => {
+describe('POST /api/products/ - Create Product with Images', () => {
   beforeAll(async () => {
     // Start in-memory MongoDB
     mongoServer = await MongoMemoryServer.create();

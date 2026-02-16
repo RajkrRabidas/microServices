@@ -15,7 +15,7 @@ async function uploadImage({ buffer, folder = '/products' }) {
         folder,
     });
     return {
-        url: res.url,
+        URL: res.url,
         thumbnail: res.thumbnailUrl || res.url,
         id: res.fileId,
     };
