@@ -13,7 +13,7 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: userValidator.error.issues[0].message });
         }
 
-        const { username, password, email, phone, fullName:{firstName, lastName} } = userValidator.data;
+        const { username, password, email, phone, fullName:{firstName, lastName}, role } = userValidator.data;
 
         const existingUser = await userModel.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
@@ -22,13 +22,17 @@ const registerUser = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await userModel.create({
+        const createPayload = {
             username,
             password: hashedPassword,
             email,
             phone,
-            fullName:{firstName, lastName},
-        });
+            fullName: { firstName, lastName },
+        };
+
+        if (role) createPayload.role = role;
+
+        const user = await userModel.create(createPayload);
 
         const token = jwt.sign({
             id: user._id,

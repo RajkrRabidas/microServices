@@ -10,6 +10,7 @@ const registerUserSchema = z.object({
         lastName: z.string().min(3, 'Last name is required'),
     }),
     phone: z.string().min(10, 'Phone number must be at least 10 digits long'),
+    role: z.enum(['user', 'seller']).optional(),
 });
 
 const loginUserSchema = z.object({

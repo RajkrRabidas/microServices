@@ -1,9 +1,7 @@
 const express = require("express");
 const multer = require("multer");
-const { createAuthMiddleware } = require("../middlewares/auth.middleware");
-const {
-  createProduct,
-} = require("../controllers/product.controller");
+const createAuthMiddleware  = require("../middlewares/auth.middleware");
+const productController = require("../controllers/product.controller");
 const { validateCreateProduct } = require("../validator/expressValidator");
 
 const router = express.Router();
@@ -21,15 +19,12 @@ const upload = multer({
   }
 });
 
-// Routes
-// Expose POST at /products so mounting with `app.use('/api', productRoutes)`
-// allows tests to call POST /api/products. Skip auth for tests.
 router.post(
-  "/products",
-  upload.array("images", 5),
-  createAuthMiddleware([ 'admin', 'seller' ]),
-  validateCreateProduct,
-  createProduct,
+    '/',
+    createAuthMiddleware([ 'admin', 'seller' ]),
+    upload.array('images', 5),
+    validateCreateProduct,
+    productController.createProduct
 );
 
 // Multer / upload error handler for this router
